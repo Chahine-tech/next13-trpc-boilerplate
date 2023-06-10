@@ -1,0 +1,14 @@
+version: '3'
+
+services:
+  database:
+    container_name: nextjs13-trpc-db
+    hostname: nextjs13-trpc-postgres
+    image: postgres:14.2
+    restart: unless-stopped
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: database
