@@ -1,4 +1,5 @@
-import ListUsers from './ListUsers'
+import ListUsers from "@/components/ListUsers";
+
 
 export default function Home() {
   return (
