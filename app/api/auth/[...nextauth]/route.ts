@@ -1,6 +1,5 @@
 import NextAuth from "next-auth/next";
 import githubProvider from "next-auth/providers/github";
-import { prisma } from "@/lib/prisma";
 import CredentialsProvider from "next-auth/providers/credentials";
 const handler = NextAuth({
   providers: [
@@ -37,8 +36,8 @@ const handler = NextAuth({
       },
     }),
     githubProvider({
-      clientId: process.env.GITHUB_ID as string,
-      clientSecret: process.env.GITHUB_SECRET as string,
+      clientId: process.env.GITHUB_CLIENT_ID as string,
+      clientSecret: process.env.GITHUB_CLIENT_SECRET as string,
     }),
   ],
   callbacks: {
