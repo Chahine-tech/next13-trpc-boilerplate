@@ -1,6 +1,11 @@
 import NextAuth from "next-auth/next";
 import githubProvider from "next-auth/providers/github";
 import CredentialsProvider from "next-auth/providers/credentials";
+import { prisma } from "@/lib/prisma";
+import * as bcrypt from "bcrypt";
+
+import { signJwtAccessToken } from "@/lib/jwt";
+import { RequestInternal, User } from "next-auth";
 const handler = NextAuth({
   providers: [
     CredentialsProvider({
@@ -9,30 +14,30 @@ const handler = NextAuth({
         username: { label: "Username", type: "text", placeholder: "jsmith" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials, req) {
-        // Add logic here to look up the user from the credentials supplied
-        const res = await fetch("/api/login", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            username: credentials?.username,
-            password: credentials?.password,
-          }),
+      async authorize(
+        credentials: Record<"username" | "password", string> | undefined,
+        req: Pick<RequestInternal, "body" | "query" | "headers" | "method">
+      ): Promise<User | null> {
+        const { username } = req.body || {};
+        const user = await prisma.user.findFirst({
+          where: { email: username },
         });
-
-        const user = await res.json();
-
-        if (user) {
-          // Any object returned will be saved in `user` property of the JWT
-          return user;
-        } else {
-          // If you return null then an error will be displayed advising the user to check their details.
+        if (!user) {
           return null;
-
-          // You can also Reject this callback with an Error thus the user will be sent to the error page with the error message as a query parameter
         }
+
+        const isPasswordCorrect = await bcrypt.compare(
+          credentials?.password as string,
+          user.password
+        );
+        if (!isPasswordCorrect) {
+          return null;
+        }
+
+        const { password, ...userWithoutPass } = user;
+        const accessToken = signJwtAccessToken(userWithoutPass);
+        const result = { ...userWithoutPass, accessToken };
+        return result as unknown as User;
       },
     }),
     githubProvider({
