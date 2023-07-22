@@ -1,4 +1,4 @@
-import Providers from "@/components/Providers";
+import Provider from "@/components/Provider";
 import "./globals.css";
 import { TrpcProvider } from "@/utils/trpc-provider";
 
@@ -16,7 +16,7 @@ export default async function RootLayout({
     <html lang="en">
       <body>
         <TrpcProvider>
-          <Providers>{children}</Providers>
+          <Provider>{children}</Provider>
         </TrpcProvider>
       </body>
     </html>
